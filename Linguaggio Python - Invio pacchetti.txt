@@ -1,0 +1,61 @@
+#importo il modulo sys per uscire dal programma in caso di connessione fallita
+import sys
+
+#importo il modulo socket per stabilire la connessione tra server e client
+import socket
+
+#importo il modulo random per la generazione dei pacchetti casuali da 1 KB
+import random
+
+
+target = input("\nInserisci l'indirizzo IP target: ")
+port = input("\nInserisci il numero  di porta: ")
+
+
+#creo un scocket scegliendo Ipv4 e UDP come parametri
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+#tento la connessione al target con la coppia ip-porta indicata dall'utente e stampo l'esito:
+#se la connessione fallisce, esco dal programma
+
+status = s.connect_ex((target, int(port)))
+
+if (status == 0):
+        print("\nConnessione al target riuscita.\n")
+else:
+        print("\nConnessione non riuscita.\n")
+        sys.exit()
+
+#genero un pacchettp di byte casuali da 1 KB
+packet = random.randbytes(1024)
+
+#chiedo all'utente quanti pacchetti da 1 KB vuole inviare
+
+#col ciclo while verifico che il valore inserito sia un numero
+while True:
+
+        n_packets = input("\nQuanti pacchetti da 1 kb vuoi inviare al target? ")
+
+        if  (not n_packets.isdigit()):
+                print("\nIl valore inserito deve essere un numero, riprova.")
+
+        else:
+                break
+
+#creo un ciclo for che invia uno a uno i pacchetti fino al numero indicato dall'utente
+#in caso di errore stampo il messaggio col dettaglio dell'errore riscrontrato e incremento una variabile
+errs = 0
+
+for i in range(0, int(n_packets)):
+
+        try:
+                s.sendto(packet, (target, int(port)))
+
+        except OSError as e:
+                errs= errs + 1
+                print("\nErrore durante l'invio del pacchetto:", str(e))
+
+#alla fine del ciclo stampo il numero di pacchetti inviati correttamente e chiudo la connnessione
+print("\n",int(n_packets) - errs, "pacchetti inviati al target.")
+
+s.close()
